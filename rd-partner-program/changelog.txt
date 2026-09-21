@@ -1,0 +1,100 @@
+ReserveDaily Partner Program - Changelog
+
+= 2.2.0 (2026-09-21) =
+* Changed: The plugin now has its own "Partner Program" menu in the wp-admin sidebar (people icon, placed after WooCommerce) instead of living under Products. Submenu: Affiliate Partners, Add New, Partner Reports, Partner Settings. Page URLs change from edit.php?post_type=product&page=... to edit.php?post_type=rd_partner&page=...; nothing else about those pages changed and no data moved.
+* Added: "Affiliate Partner" column on the Users list. Shows the partner the customer is tagged to (linked to the partner edit screen), the code they came in with, the signup date, and whether their perks window is still active. Untagged users show "None". A dropdown next to the role filter narrows the list to one partner, any tagged user, or untagged users only. Read only, no data is written.
+* No database change.
+  - Modified files: class-rd-ppg-partner-cpt.php, class-rd-ppg-reports.php, class-rd-ppg-settings.php, rd-partner-program.php, readme.txt
+  - New file: class-rd-ppg-users-column.php
+
+= 2.1.1 (2026-09-13) =
+* Changed: The typed "Partner code (optional)" fields on the registration form and at checkout are now off by default. New switch "Typed partner code fields" in Partner Settings turns them back on. With the switch off the referral link (or QR code) is the only way to join a partner program. Tagging through links and the cookie is unchanged, and a code posted by other means (the friend referral field in the server-side snippet) is still honored.
+* Removed: The two guest notices for visitors carrying a partner cookie ("You arrived with partner code X, create an account so your partner rewards and discounts apply" on checkout, and the matching "log in or create an account before checkout" notice on the cart page). Management found them annoying and they promised benefits a partner may not give. Tagging on registration and the server-side RM50 snippet notices are unchanged.
+  - Modified files: class-rd-ppg-referral.php, class-rd-ppg-settings.php, rd-partner-program.php, readme.txt
+
+= 2.1.0 (2026-09-11) =
+* Added: Commission rate per item. The eligible categories and eligible products tables on the partner edit screen carry a new "Commission rate, percent" column next to the discount rate. Blank means the partner default rate, any number (including 0) is that item's own rate. A product row beats a category row when both match, same as discounts.
+* Changed: The partner "Commission rate" field is now "Default commission rate". When no row carries its own rate, nothing changes: one rate on the whole order net of refunds, exactly as before (HOP keeps working untouched). When any row carries its own rate, commission is worked out line by line: each product line at its resolved rate on the line value after discounts and net of refunds on that line. Shipping and fees are not commissioned in that mode. The entry stores the blended rate so Adjust still scales the whole entry proportionally.
+* Added: Per line breakdown stored with each commission entry (new breakdown column, database version 1.3.0, added automatically on update). Partner Reports shows the breakdown under the order row and the CSV export gains an "Item Breakdown" column, so the partner can see what each item paid.
+  - Modified files: class-rd-ppg-partner.php, class-rd-ppg-partner-cpt.php, class-rd-ppg-commission.php, class-rd-ppg-reports.php, class-rd-ppg-install.php, rd-partner-program.php, readme.txt
+
+= 2.0.4 (2026-08-02) =
+* Fixed: The 2.0.3 change kept the highest line price ever seen as the undiscounted original and stored it in the cart session. When another snippet re-applied the add-on surcharge during repeated cart recalculations, that stored original ratcheted upward and the discounted price could end up above the true price (RM146 product charged RM149.40). The undiscounted price is now read fresh on the first calculation pass of every request and never stored, so it always matches the true current price including add-ons, including after the customer edits their add-on options. Stale stored originals from 2.0.2 and 2.0.3 carts are cleared automatically.
+  - Modified file: class-rd-ppg-discounts.php
+
+= 2.0.3 (2026-08-02) =
+* Fixed: Partner discount ignored paid product add-ons. The original price was captured from the bare product at add-to-cart time, before add-on plugins put their surcharge on the line, so the discount both skipped the add-on amount and wiped its charge from the total (RM126 base + RM20 add-on came out as RM100.80 instead of RM116.80). The original price is now captured at cart calculation time, after add-on surcharges are in, so the percent applies to base plus add-ons. Carts holding a stale captured price self-correct on the next page load.
+  - Modified file: class-rd-ppg-discounts.php
+
+= 2.0.2 (2026-07-31) =
+* Fixed: Category rows on the partner edit screen were not saving. WooCommerce's category search field posts the category slug (text) unless told to return the id, and the save handler only accepted numbers, so every category row was silently dropped on save. Both the eligible discount categories and the redemption perk categories were affected. Product rows were never affected.
+* The category fields now request the numeric id from WooCommerce (data-return_id) and the save handler accepts either an id or a slug, so it also works with cached admin scripts and older WooCommerce versions.
+  - Modified file: class-rd-ppg-partner-cpt.php
+
+= 2.0.1 (2026-07-16) =
+* Changed: The redemption perk in "On selected items" mode now uses a blended cap instead of unlocking the perk percent for the whole cart. The perk percent applies only to the perk items' share of the cart value; every other item (and shipping, when the toolkit counts it) contributes at the standard percent. Example: RM310 perk item + RM200 normal item = RM62 + RM10 = RM72 max in points, not RM102. "On all items" mode is unchanged.
+* Fixed: Removed the test expiry override (minutes) added during staging testing. Month rule and per-partner welcome days are the only expiry rules.
+* Related snippet updates this cycle: uk-my-points-v3.php (single combined activity table with friendly labels, both point types, no misleading expiry column), uk-dashboard-mycred-v2.php (welcome credit chip, top rank badge fix, rank progress follows the myCRED rank basis, external avatar placeholder removed).
+
+= 2.0.0 (2026-07-12) =
+* Changed: Two-point-type architecture. The partner welcome bonus now pays into its own myCRED point type (default key mycred_welcome, "Welcome Credits") instead of the main balance. The Toolkit's native per-type redemption max does the capping: Welcome Credits 100 percent (set in myCRED per-type settings), main Vital Points 5 percent standard or the per-partner perk cap. This removes the entire ledger-based "no cap while bonus active" rule and the bug class where a spent bonus could keep granting 100 percent.
+* Changed: Welcome Credit expiry is a per-user timestamp stamped at award (partner expiry days, default 30). The daily sweep zeroes whatever Welcome Credit remains after the timestamp passes. No batch tracking involved.
+* Added: The partial payment point type picker is hidden at cart and checkout. The plugin auto-selects Welcome Credits while the customer has a balance, Vital Points otherwise, using the Toolkit's own change handler to load the slider. One type per order; Welcome Credits take priority until spent or expired.
+* Fixed: The ledger spend recorder now ignores transactions of other point types. A Welcome Credit payment can no longer consume main-type ledger batches.
+* Changed: The cap injection skips Welcome Credit requests entirely so its native 100 percent max always stands.
+* Safety: Everything falls back to the previous single-type behavior when the Welcome Credit point type does not exist in myCRED (production before the go-live setup step).
+* Setup required on each site: create the point type (key mycred_welcome) in myCRED, enable partial payment for it with max 100, and disable the built-in myCRED "Points for registration" hook if active.
+  - Modified files: class-rd-ppg-settings.php, class-rd-ppg-referral.php, class-rd-ppg-expiry.php, class-rd-ppg-redemption.php, class-rd-ppg-ledger.php, rd-partner-program.php
+  - Related snippet: welcome-snippet/uk-my-points-v2.php shows both balances on the My Points page
+
+= 1.9.0 (2026-07-11) =
+* Changed: Simplified points model per Captain's final spec. Two point kinds only: the partner welcome bonus (per-partner amount, awarded at signup, day-based expiry, no redemption cap while active) and normal order points. The site-wide welcome points for all registrations and the general signup bonus are removed. The no-cap rule now watches the partner welcome bonus (ledger source signup_bonus) instead of the retired welcome source.
+* Added: Points Redemption Perk metabox on the partner edit screen. Three modes: Off (normal site cap), On selected items (perk cap when the cart contains a chosen product or category), On all items (perk cap storewide). Cap percent per partner, default 20. Product and category pickers only show for the selected-items mode. Applies to this partner's tagged in-window customers only, fully independent from the discount eligibility lists.
+* Removed: Global premium products, premium categories, and premium redemption cap from Partner Settings. Redemption perks now live on each partner. The standard redemption cap stays global.
+* Removed: The old per-partner "Points redemption cap" override field (v1.7.0). The Points Redemption Perk replaces it: the old flat-percent behavior is the perk's "On all items" mode. One control instead of two.
+* Changed: New partner defaults match the final program spec: commission order cap 0 (unlimited) and points multiplier 1.5 (were 3 and 3 from the early draft).
+* Added: Welcome bonus expiry days moved next to the bonus amount on the partner edit screen, per partner. Blank means 30 days. The global Partner Settings field is removed; the site default stays as fallback.
+* Removed: myCRED point type and referral cookie name fields from Partner Settings. Both were change-nothing footguns; the stored values remain in effect and code reads them as before.
+* Removed: "Auto backfill freed slots" toggle from the partner edit screen. With unlimited order caps and a strict no-refund policy there are no slots to backfill. The manual settlement tools (Void, Adjust, Promote, Note) remain.
+* Removed: Dead ledger helpers (user_has_welcome_points wrapper, active_balance) left over from the retired site-wide welcome points.
+* Changed: Standard redemption cap description now states it is the single source of truth; the percent stored in myCRED settings is overridden at checkout and can be ignored.
+* Added: Duplicate row action on the Affiliate Partners list. Copies all deal settings into a Draft with parent code, coach codes, and linked accounts cleared. Stats and commissions never copy. Edit codes, then publish.
+* Added: RM50 welcome code stacking switch in Partner Settings. Controls whether the server-side RM50 welcome offer combines with partner discounts. Off by default (partner discount wins). Flip from the dashboard, no code changes.
+* Added: Welcome snippet v3 (welcome-snippet folder, server-side): reads the stacking switch, blocks RM50 whenever a myCRED points redemption coupon is in the cart (management rule: never both on one order), min spend RM500 unchanged.
+  - New metabox/fields: class-rd-ppg-partner-cpt.php, class-rd-ppg-partner.php
+  - Redemption logic: class-rd-ppg-redemption.php, class-rd-ppg-ledger.php
+  - Settings: class-rd-ppg-settings.php
+  - Removed file: class-rd-ppg-welcome.php
+
+= 1.8.0 (2026-07-10 update) =
+* Fixed: Redemption cap override now works with the updated myCRED Toolkit Pro (revamped WooCommerce Plus). The new Toolkit version reads the max percent from the myCRED point type settings (partial_payment_settings mwp_max) instead of the mycred_pref_woo option, and serves both the slider and the apply-discount validation through two AJAX endpoints. The plugin now hooks those endpoints at an earlier priority and swaps the max on the cached myCRED settings object. Legacy option filters kept for compatibility with the old Toolkit version on production.
+* Changed: Premium redemption cap is now a partner perk only. The cart-based premium cap applies only to partner-tagged customers inside their window. Non-tagged customers always get the standard cap. Welcome points users keep the no-cap rule, and per-partner overrides still take priority.
+
+= 1.8.0 (2026-07-07) =
+* Added: Points Ledger with Shopee-style FIFO expiry. New table rd_ppg_points_ledger tracks every point batch with earned_at and expires_at. Points expire at the end of the Nth month after earning (default N=3: earned July, expires September 30). Daily WP Cron sweeps expired batches and deducts from myCRED balance automatically. Oldest points are consumed first on redemption.
+* Added: Welcome Points for all new users. Configurable amount (default 2,500 = RM25) awarded on registration via myCRED. Normal Shopee expiry applies.
+* Added: Tiered redemption caps. Premium product categories (admin-selectable) allow up to 20% of cart payable with points. Non-premium products default to 5%. Both percentages configurable. Users with active welcome points get no cap (100%). Partner-specific override still takes priority when set.
+* Added: Partner signup bonus uses separate short expiry (default 30 days, configurable). Welcome points and order points follow the normal Shopee end-of-month rule.
+* Added: New admin settings: Welcome points amount, Points expiry months, Partner signup bonus expiry days, Premium redemption cap %, Standard redemption cap %, Premium product categories picker.
+* Added: One-time ledger backfill from existing myCRED log on upgrade (chunked, non-blocking).
+* Added: Commission pause switch per partner. Checkbox "Pause commissions" stops new commission entries while keeping tagging, discounts, points, visits, and the affiliate dashboard running. Reports page shows a warning when paused.
+* Added: Period Total row at the bottom of the commission table and in CSV export. One number for the partner to invoice against.
+* Changed: Settings page reorganized into sections (Points, Redemption Caps, Referral, Other).
+  - New files: class-rd-ppg-ledger.php, class-rd-ppg-welcome.php, class-rd-ppg-expiry.php
+  - Modified files: class-rd-ppg-install.php, class-rd-ppg-points.php, class-rd-ppg-referral.php, class-rd-ppg-redemption.php, class-rd-ppg-settings.php, class-rd-ppg-partner.php, class-rd-ppg-partner-cpt.php, class-rd-ppg-commission.php, class-rd-ppg-reports.php, rd-partner-program.php
+
+= 1.7.1 (2026-07-07) =
+* Added: Per-partner "Bonus for existing customers" checkbox. When enabled alongside "Allow existing customers", existing users who get tagged via a partner referral link also receive the signup bonus points. Off by default.
+  - Files changed: class-rd-ppg-referral.php, class-rd-ppg-partner-cpt.php, class-rd-ppg-partner.php, rd-partner-program.php
+
+= 1.7.0 =
+* Added: Per-partner "Points redemption cap %" override. Overrides the site-wide myCRED redemption cap for tagged in-window customers.
+* Added: RD_PPG_Redemption class that filters myCRED WooCommerce settings at runtime without touching myCRED files.
+* Fixed: Admin non-ajax screens show the stored site-wide value, not the override.
+
+= 1.6.0 =
+* Added: Two-clock time model. Customer cutoff = MIN(own signup + window_months, partner deal_end). Single cutoff governs commission, discounts, points multiplier, and redemption override together.
+* Added: Deal end date field per partner. Past deal_end stops new tagging, visits, and shows "partnership ended" on affiliate dashboard.
+
+= 1.5.0 and earlier =
+* Initial build through v1.5.0: partner CPT, referral capture (cache-proof AJAX), tagging, commission tracking with manual settlement, discount engine, points multiplier with myCRED ranks, affiliate dashboard, admin reports, CSV export.

@@ -1,0 +1,13 @@
+# Only the plugin source is published. Everything else in this workspace
+# (boss docs, test plans, server snippets, third-party plugin reference
+# copies, local zips, Claude settings) stays local.
+/*
+!/.gitignore
+!/README.md
+!/rd-partner-program/
+
+# Never commit user-made packages or OS clutter.
+*.zip
+Thumbs.db
+desktop.ini
+.DS_Store
