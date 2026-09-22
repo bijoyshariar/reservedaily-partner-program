@@ -69,6 +69,13 @@ class RD_PPG_Settings {
 		$ranks = isset( $saved['rank_percentages'] ) && is_array( $saved['rank_percentages'] ) ? $saved['rank_percentages'] : array();
 		$settings['rank_percentages'] = wp_parse_args( $ranks, $defaults['rank_percentages'] );
 
+		// The welcome bonus expiry fallback was a visible setting in 1.x and can
+		// still be stored as blank or 0 from that time. Zero days would stamp the
+		// welcome credit as expired at the moment it is awarded (2.3.1 fix).
+		if ( (int) $settings['signup_bonus_expiry_days'] <= 0 ) {
+			$settings['signup_bonus_expiry_days'] = $defaults['signup_bonus_expiry_days'];
+		}
+
 		if ( null === $key ) {
 			return $settings;
 		}
@@ -234,7 +241,7 @@ class RD_PPG_Settings {
 
 		update_option( self::OPTION, $settings );
 
-		wp_safe_redirect( add_query_arg( array( 'post_type' => 'product', 'page' => 'rd-ppg-settings', 'updated' => 1 ), admin_url( 'edit.php' ) ) );
+		wp_safe_redirect( add_query_arg( array( 'post_type' => 'rd_partner', 'page' => 'rd-ppg-settings', 'updated' => 1 ), admin_url( 'edit.php' ) ) );
 		exit;
 	}
 }

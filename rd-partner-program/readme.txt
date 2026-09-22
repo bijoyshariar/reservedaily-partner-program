@@ -5,14 +5,14 @@ Author URI: https://shariarbijoy.dev
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 2.2.0
+Stable tag: 2.3.1
 License: GPLv2 or later
 
 Multi merchant referral programs for WooCommerce. Partner tagging, automatic discounts, myCRED points multipliers, and commission tracking with manual refund settlement.
 
 == Description ==
 
-Customers sign up with a partner code, get permanently tagged to that partner, receive a points multiplier and automatic category discounts on purchases, and the partner earns commission on that customer's first N completed orders inside a rolling window from signup. Everything is editable from the WordPress admin under the Partner Program menu in the sidebar. The Users list shows which affiliate partner each customer is tagged to and can be filtered by partner.
+Customers sign up with a partner code, get permanently tagged to that partner, receive a points multiplier and automatic category discounts on purchases, and the partner earns commission on that customer's first N completed orders inside a rolling window from signup. Everything is editable from the WordPress admin under the Partner Program menu in the sidebar. The Users list shows which affiliate partner each customer is tagged to and can be filtered by partner. The user edit screen has an Affiliate Partner box that shows the tag, and for an untagged customer lets a manager tag them to a partner by hand (permanent, perks window starts that day, optional welcome bonus).
 
 Requires WooCommerce and myCRED. Built for legacy post storage, not HPOS.
 

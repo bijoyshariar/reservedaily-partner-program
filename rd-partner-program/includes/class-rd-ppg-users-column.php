@@ -69,6 +69,9 @@ class RD_PPG_Users_Column {
 		if ( $signup > 0 ) {
 			$details[] = esc_html( wp_date( get_option( 'date_format' ), $signup ) );
 		}
+		if ( 'manual' === get_user_meta( $user_id, 'rd_ppg_tag_source', true ) ) {
+			$details[] = esc_html__( 'tagged by hand', 'rd-partner-program' );
+		}
 		if ( 'publish' === $post->post_status && class_exists( 'RD_PPG_Partner' ) ) {
 			$partner = RD_PPG_Partner::get( $merchant_id );
 			if ( $partner ) {

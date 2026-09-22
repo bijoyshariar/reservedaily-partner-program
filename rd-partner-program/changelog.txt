@@ -1,5 +1,21 @@
 ReserveDaily Partner Program - Changelog
 
+= 2.3.1 (2026-09-22) =
+* Fixed (precaution): The per-partner "Welcome bonus expiry, days" field falls back to a hidden site default that was a visible setting in 1.x. If that stored value were blank or 0, the expiry stamp would equal the award time and the next daily sweep would zero the credits. The site default now reads as 30 days whenever it is missing, blank, or 0, and the award has a final guard so the stamp is never at or before the award time. Note: the "Expired" label seen in the myCRED log Expiry column on 2026-09-22 was not this. That column is drawn by the myCRED Toolkit Pro Expiration addon and shows "Expired" on every row of a point type whose "Points Expiration" hook has no days set; it is a label only, no points are deducted by it.
+* Fixed: Three admin links still pointed at the old Products menu location after 2.2.0: the Partner Reports filter and pagination links, the redirect after a settlement action, and the redirect after saving Partner Settings. Each landed on a permission or not found page. They now point at the Partner Program menu.
+* Added: On the user edit screen, a tagged customer with no live welcome bonus (never received it, or it expired) gets a "Pay welcome bonus" checkbox. Ticking it and pressing Update User pays the partner welcome bonus through the normal path with a fresh expiry. A customer with a live bonus never gets the checkbox, so nobody is paid twice by accident.
+* Changed: When manually tagging a customer with the bonus box ticked, a stale "already awarded" flag left from an earlier removed tag no longer silently blocks the payment. The success notice now reports what actually happened.
+* No database change.
+  - Modified files: class-rd-ppg-referral.php (award_signup_bonus returns true or false), class-rd-ppg-settings.php, class-rd-ppg-reports.php, class-rd-ppg-user-profile.php, rd-partner-program.php, readme.txt
+
+= 2.3.0 (2026-09-22) =
+* Added: "Affiliate Partner" box on the wp-admin user edit screen (Users, Edit User). For a tagged customer it shows the partner, code, signup date, how they were tagged, when the perks window ends, and whether the welcome bonus was awarded. Read only, the tag cannot be changed or removed there.
+* Added: Manual tagging for an untagged customer, for cases management approves. Pick the partner in the box, optionally keep "Award the partner welcome bonus now" ticked, and press Update User. The tag is written through the same code as a link signup (permanent, one partner per customer, signup date = today so the perks window starts today), counted as a signup in the partner's stats under the parent code, and the welcome bonus goes through the normal award path (Welcome Credits with expiry when the point type exists, otherwise Vital Points). Only published, active partners whose deal has not ended are offered, the same gate a referral link passes. Requires the WooCommerce manager capability plus permission to edit that user. Past orders are never commissioned.
+* Changed: Users list column notes "tagged by hand" on manually tagged customers. New user meta rd_ppg_tag_source ("manual") and rd_ppg_tagged_by (admin user id) record the action.
+* No database change.
+  - Modified files: class-rd-ppg-referral.php (award_signup_bonus is now public), class-rd-ppg-users-column.php, rd-partner-program.php, readme.txt
+  - New file: class-rd-ppg-user-profile.php
+
 = 2.2.0 (2026-09-21) =
 * Changed: The plugin now has its own "Partner Program" menu in the wp-admin sidebar (people icon, placed after WooCommerce) instead of living under Products. Submenu: Affiliate Partners, Add New, Partner Reports, Partner Settings. Page URLs change from edit.php?post_type=product&page=... to edit.php?post_type=rd_partner&page=...; nothing else about those pages changed and no data moved.
 * Added: "Affiliate Partner" column on the Users list. Shows the partner the customer is tagged to (linked to the partner edit screen), the code they came in with, the signup date, and whether their perks window is still active. Untagged users show "None". A dropdown next to the role filter narrows the list to one partner, any tagged user, or untagged users only. Read only, no data is written.

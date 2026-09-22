@@ -157,7 +157,7 @@ class RD_PPG_Reports {
 			}
 		}
 
-		$base_url = add_query_arg( array( 'post_type' => 'product', 'page' => 'rd-ppg-reports' ), admin_url( 'edit.php' ) );
+		$base_url = add_query_arg( array( 'post_type' => 'rd_partner', 'page' => 'rd-ppg-reports' ), admin_url( 'edit.php' ) );
 		?>
 		<div class="wrap rd-ppg-admin">
 			<style>
@@ -498,7 +498,7 @@ class RD_PPG_Reports {
 
 		$redirect = isset( $_POST['redirect'] ) ? rawurldecode( wp_unslash( $_POST['redirect'] ) ) : '';
 		if ( ! $redirect || 0 !== strpos( $redirect, admin_url() ) ) {
-			$redirect = add_query_arg( array( 'post_type' => 'product', 'page' => 'rd-ppg-reports' ), admin_url( 'edit.php' ) );
+			$redirect = add_query_arg( array( 'post_type' => 'rd_partner', 'page' => 'rd-ppg-reports' ), admin_url( 'edit.php' ) );
 		}
 		wp_safe_redirect( add_query_arg( 'rd_ppg_msg', $message, $redirect ) );
 		exit;

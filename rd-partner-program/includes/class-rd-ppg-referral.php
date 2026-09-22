@@ -143,16 +143,20 @@ class RD_PPG_Referral {
 		return true;
 	}
 
-	private static function award_signup_bonus( $user_id, $merchant_id ) {
+	/**
+	 * Awards the partner welcome bonus once per user. Public since 2.3.0 so the
+	 * manual tagging box on the user edit screen uses the same path.
+	 */
+	public static function award_signup_bonus( $user_id, $merchant_id ) {
 		if ( ! function_exists( 'mycred_add' ) ) {
-			return;
+			return false;
 		}
 		if ( 'yes' === get_user_meta( $user_id, 'rd_ppg_signup_bonus_awarded', true ) ) {
-			return;
+			return false;
 		}
 		$partner = RD_PPG_Partner::get( $merchant_id );
 		if ( ! $partner || $partner['signup_bonus'] <= 0 ) {
-			return;
+			return false;
 		}
 
 		$welcome_type = RD_PPG_Settings::welcome_type();
@@ -174,6 +178,10 @@ class RD_PPG_Referral {
 			if ( $bonus_expiry_days <= 0 ) {
 				$bonus_expiry_days = (int) RD_PPG_Settings::get( 'signup_bonus_expiry_days' );
 			}
+			if ( $bonus_expiry_days <= 0 ) {
+				// Never stamp an expiry at or before "now" (2.3.1 guard).
+				$bonus_expiry_days = 30;
+			}
 
 			if ( '' !== $welcome_type ) {
 				// Welcome Credit point type: expiry is a per-user timestamp, the
@@ -184,6 +192,7 @@ class RD_PPG_Referral {
 				RD_PPG_Ledger::insert( $user_id, 'signup_bonus', $partner['signup_bonus'], $merchant_id, null, $bonus_expiry_days );
 			}
 		}
+		return (bool) $added;
 	}
 
 	private static function clear_cookie() {

@@ -3,7 +3,7 @@
  * Plugin Name: ReserveDaily Partner Program
  * Plugin URI: https://shariarbijoy.dev
  * Description: Affiliate partner referral programs for WooCommerce. Partner tagging, referral traffic and signup tracking, automatic category and product discounts, myCRED points multipliers, and commission tracking with manual refund settlement. Developed by Shariar Bijoy.
- * Version: 2.2.0
+ * Version: 2.3.1
  * Author: Shariar Bijoy
  * Author URI: https://shariarbijoy.dev
  * Text Domain: rd-partner-program
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RD_PPG_VERSION', '2.2.0' );
+define( 'RD_PPG_VERSION', '2.3.1' );
 define( 'RD_PPG_FILE', __FILE__ );
 define( 'RD_PPG_DIR', plugin_dir_path( __FILE__ ) );
 
@@ -38,6 +38,7 @@ require_once RD_PPG_DIR . 'includes/class-rd-ppg-redemption.php';
 require_once RD_PPG_DIR . 'includes/class-rd-ppg-ledger.php';
 require_once RD_PPG_DIR . 'includes/class-rd-ppg-expiry.php';
 require_once RD_PPG_DIR . 'includes/class-rd-ppg-users-column.php';
+require_once RD_PPG_DIR . 'includes/class-rd-ppg-user-profile.php';
 
 register_activation_hook( __FILE__, array( 'RD_PPG_Install', 'activate' ) );
 
@@ -60,6 +61,7 @@ function rd_ppg_init() {
 	RD_PPG_Redemption::init();
 	RD_PPG_Expiry::init();
 	RD_PPG_Users_Column::init();
+	RD_PPG_User_Profile::init();
 }
 
 function rd_ppg_wc_missing_notice() {
